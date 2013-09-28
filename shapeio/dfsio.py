@@ -5,7 +5,7 @@
 __author__ = "Brandon Ayers"
 __copyright__ = "Copyright 2013, Brandon Ayers, Ahmanson-Lovelace Brain Mapping Center, \
                  University of California Los Angeles"
-__email__ = ""
+__email__ = "ayersb@ucla.edu"
 
 
 import numpy as np

@@ -51,7 +51,7 @@ def readdfs(fname):
         #print 'reading vertex labels.'
         fid.seek(hdr.labelOffset)
         #labels are 2 byte unsigned integers, so use unsigned short in python
-        NFV.labels = np.array(struct.unpack('H' *hdr.nVertices, fid.read(hdr.nVertices * 2)),dtype ='uint16')
+        NFV.labels = np.array(struct.unpack('H'*hdr.nVertices, fid.read(hdr.nVertices * 2)),dtype ='uint16')
     if (hdr.vertexAttributes>0):
         #print 'reading vertex attributes.'
         fid.seek(hdr.vertexAttributes)

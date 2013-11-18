@@ -44,13 +44,14 @@ def readdfs(fname):
     if (hdr.uvStart>0):
         #print 'reading uv coordinates.'
         fid.seek(hdr.uvStart)
-        uv = np.array(struct.unpack('f'*2*hdr.nVertices, fid.read(2*hdr.nVertices*4)),dtype = 'float32').reshape(2,hdr.nVertices)
-        NFV.u = uv[0]
-        NFV.v = uv[1]  
+        uv = np.array(struct.unpack('f'*2*hdr.nVertices, fid.read(2*hdr.nVertices*4)),dtype = 'float32').reshape(hdr.nVertices, 2)
+        NFV.u = uv[:, 0]
+        NFV.v = uv[:, 1]
     if (hdr.labelOffset>0):
         #print 'reading vertex labels.'
         fid.seek(hdr.labelOffset)
-        NFV.labels = np.array(struct.unpack('I' *hdr.nVertices, fid.read(hdr.nVertices * 2)),dtype ='uint16') #Size(unint16) = 2 bytes  
+        #labels are 2 byte unsigned integers, so use unsigned short in python
+        NFV.labels = np.array(struct.unpack('H' *hdr.nVertices, fid.read(hdr.nVertices * 2)),dtype ='uint16')
     if (hdr.vertexAttributes>0):
         #print 'reading vertex attributes.'
         fid.seek(hdr.vertexAttributes)

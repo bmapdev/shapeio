@@ -15,7 +15,13 @@ import dfsio
 import re
 import StringIO
 
-#import re
+# Optionally import the parse module
+import imp
+try:
+    import parse
+except ImportError:
+    parse_module_exists = False
+
 
 
 FORMATS_TYPES = {
@@ -242,7 +248,7 @@ def ReadCCBBM_sphere(filename):
 
 def ReadCCBBM(filename):
 
-    fid = open(filename,'rt')
+    fid = open(filename, 'rt')
     lines = fid.readlines()
     regex=r'[-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?'
 
@@ -250,7 +256,10 @@ def ReadCCBBM(filename):
 
     # Skip all lines until vertex
     ctr = 0
-    while lines[ctr][0:3] != 'Ver':
+    parser1 = parse.compile("Vertex {:d} {:g} {:g} {:g} {Jfeature=({:g} {:g} {:g} {:g} {:g} {:g} {:g})}")
+    parser2 = parse.compile("Vertex {:d} {:g} {:g} {:g}")
+
+    while lines[ctr][0:6] != 'Vertex':
         ctr += 1
 
     # First read the vertices
@@ -258,9 +267,20 @@ def ReadCCBBM(filename):
     line_split = line.split()
     ctr += 1
     # ctr = 1;
+    attributes = []
     while line_split[0] == 'Vertex':
-        Xtemp = [float(line_split[2]),float(line_split[3]),float(line_split[4])]
-        coords.append(Xtemp)
+        result = parser1.parse(line)
+        if result is not None:
+            (idx, vtx1, vtx2, vtx3, radial_dist, mTBM1, mTBM2, mTBM3, detJacobian, eig1Jacobian, eig2Jacobian) = result.fixed
+            attributes.append(radial_dist)
+        else:
+            result = parser2.parse(line)
+            if result is not None:
+                (idx, vtx1, vtx2, vtx3) = result.fixed
+            else:
+                sys.stdout.write('Cannot parse the line' + line)
+
+        coords.append([vtx1, vtx2, vtx3])
         line = lines[ctr]
         line_split = line.split()
         ctr += 1
@@ -269,16 +289,16 @@ def ReadCCBBM(filename):
     # The rest of the lines are faces
     faces = []
     ctr -= 1
-    for ii in range(ctr,len(lines)):
+    for ii in range(ctr, len(lines)):
         line = lines[ii]
-        line_split = line.split()
-        Xtemp = [int(line_split[2]),int(line_split[3]),int(line_split[4])]
-        faces.append(Xtemp)
-        ctr += 1
+        result = parse.search("Face {:d} {:d} {:d} {:d}", line)
+        (idx, face1, face2, face3) = result.fixed
+        faces.append([face1, face2, face3])
+
     faces = np.array(faces)
     if faces.min() == 1:
         faces -= 1
-    attributes = []
+
     isMultilevelUCF = False
     return coords, faces, attributes, isMultilevelUCF
 

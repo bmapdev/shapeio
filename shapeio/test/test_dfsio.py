@@ -9,12 +9,12 @@ __email__ = "s.joshi@ucla.edu"
 
 from shapeio.surfio import Surface
 
-dfsfile = 'data/left_test.dfs'
+dfsfile = 'shapeio/test/data/left_test.dfs'
 
 
 def test_read():
     s1 = Surface.readfile(dfsfile)
-
+    print "done"
 
 def test_write():
     pass

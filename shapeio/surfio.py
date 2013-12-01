@@ -14,6 +14,7 @@ import vtkio
 import dfsio
 import re
 import StringIO
+import pandas as pd
 
 # Optionally import the parse module
 import imp
@@ -585,10 +586,11 @@ def writesurface_new(filename,coords,faces,attributes=[],isMultilevelUCF=False):
         vtkio.WriteVTK_XML_Polydata_old(filename,coords,faces,'',attributes)
 
     def dfs(filename):
-        NFV.vertices = coords
-        NFV.faces = faces
+        s1 = Surface()
+        s1.vertices = coords
+        s1.faces = faces
         # NFV.attributes = attributes
-        dfsio.writedfs(filename,NFV)
+        dfsio.writedfs(filename,s1)
 
 
     def ucf(filename):
@@ -630,7 +632,7 @@ def convertUCFSurfacetoVTP(ucf_surf,surf_with_conn,vtp_surf):
     vtkio.WriteVTK_XML_Polydata_old(vtp_surf,X[0],conn_faces,'',attributes[0])
 
 
-def AggregateUCFattribute(attributes):
+def aggregate_ucf_attributes(attributes):
 
     N = len(attributes)
     T = len(attributes[0])
@@ -640,6 +642,51 @@ def AggregateUCFattribute(attributes):
         attribues_aggregate = np.append(attribues_aggregate,attributes[i])
 
     return attribues_aggregate
+
+
+def read_aggregated_attributes_from_surfaces(filename):
+    data_list = pd.read_table(filename, sep='\t')
+
+    # Read first file
+    s1 = Surface()
+    s1.read(data_list['File'][0])
+    if s1.ismultilevelUCF:
+        attributes_new = aggregate_ucf_attributes(s1.attributes)
+    else:
+        attributes_new = s1.attributes
+
+    num_files = len(data_list['File'])
+    attrib_size = len(attributes_new)
+
+    attribute1_array = np.empty((num_files, attrib_size), 'float')
+    attribute1_array[0, :] = attributes_new
+
+    file_list = data_list['File']
+
+    if s1.ismultilevelUCF:
+        for i in range(1, len(file_list)):
+            s1.read(data_list['File'][i])
+            attributes_new = aggregate_ucf_attributes(s1.attributes)
+            if len(attributes_new) != attrib_size:
+                sys.stdout.write("Length of attributes in Files " + data_list['File'][i] + " and " + data_list['File'][0]
+                                 + " do not match. Quitting.\n")
+                attribute1_array = []
+                return attribute1_array
+            else:
+                attribute1_array[i, :] = attributes_new
+    else:
+        for i in range(1, len(file_list)):
+            s1.read(data_list['File'][i])
+            if len(s1.attributes) != attrib_size:
+                sys.stdout.write("Length of attributes in Files " + data_list['File'][i] + " and " + data_list['File'][0]
+                                 + " do not match. Quitting.\n")
+                attribute1_array = []
+                return attribute1_array
+            else:
+                attribute1_array[i, :] = s1.attributes
+
+    return s1, attribute1_array
+
 
 class Surface(object):
 

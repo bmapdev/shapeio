@@ -247,7 +247,51 @@ def ReadCCBBM_sphere(filename):
     coords = np.array(coords)
 
 
-def ReadCCBBM(filename):
+def readccbbm(filename):
+    fid = open(filename, 'rt')
+    lines = fid.readlines()
+    coords = []
+
+    # Skip all lines until vertex
+    ctr = 0
+    while lines[ctr][0:6] != 'Vertex':
+        ctr += 1
+
+    # First read the vertices
+    line = lines[ctr]
+    line_split = line.split()
+    ctr += 1
+    # ctr = 1;
+    attributes = []
+    while line_split[0] == 'Vertex':
+        vtx1 = float(line_split[2])
+        vtx2 = float(line_split[3])
+        vtx3 = float(line_split[4])
+        radial_dist = float(re.findall('\d*\.?\d+', line_split[5])[0])
+        coords.append([vtx1, vtx2, vtx3])
+        attributes.append(radial_dist)
+        line = lines[ctr]
+        line_split = line.split()
+        ctr += 1
+
+    coords = np.array(coords)
+    # The rest of the lines are faces
+    faces = []
+    ctr -= 1
+    for ii in range(ctr, len(lines)):
+        line_split = lines[ii].split()
+        faces.append([int(line_split[2]), int(line_split[3]), int(line_split[4])])
+
+    faces = np.array(faces)
+    if faces.min() == 1:
+        faces -= 1
+
+    isMultilevelUCF = False
+    return coords, faces, attributes, isMultilevelUCF
+
+
+
+def readccbbm_using_parse(filename):
 
     fid = open(filename, 'rt')
     lines = fid.readlines()
@@ -426,7 +470,7 @@ def readsurface_new(filename):
         return coords,faces,attributes,isMultilevelUCF
 
     def ccbbm(filename):
-        return ReadCCBBM(filename)
+        return readccbbm(filename)
 
     def ucf(filename):
         X,attributes = ReadUCFMultipleLevelsWithData(filename)
@@ -686,6 +730,20 @@ def read_aggregated_attributes_from_surfaces(filename):
                 attribute1_array[i, :] = s1.attributes
 
     return s1, attribute1_array
+
+
+def write_pvalues_to_surface(pvalue_array, s1, filename):
+
+    if s1.ismultilevelUCF is True:
+        pvalue_array = np.reshape(pvalue_array, (len(s1.attributes), len(s1.attributes[0])), 'C')
+        pvalues = []
+        for ii in range(0, len(s1.attributes)):
+            pvalues.append(np.array(pvalue_array[ii, :]))
+    else:
+        pvalues = pvalue_array
+
+    s1.attributes = pvalues
+    s1.write(filename)
 
 
 class Surface(object):

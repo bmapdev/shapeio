@@ -706,6 +706,7 @@ def read_aggregated_attributes_from_surfaces(filename):
     attribute1_array[0, :] = attributes_new
 
     file_list = data_list['File']
+    average_coords = s1.coords
 
     if s1.ismultilevelUCF:
         for i in range(1, len(file_list)):
@@ -721,6 +722,7 @@ def read_aggregated_attributes_from_surfaces(filename):
     else:
         for i in range(1, len(file_list)):
             s1.read(data_list['File'][i])
+            average_coords += s1.coords
             if len(s1.attributes) != attrib_size:
                 sys.stdout.write("Length of attributes in Files " + data_list['File'][i] + " and " + data_list['File'][0]
                                  + " do not match. Quitting.\n")
@@ -729,7 +731,11 @@ def read_aggregated_attributes_from_surfaces(filename):
             else:
                 attribute1_array[i, :] = s1.attributes
 
-    return s1, attribute1_array
+    average_coords /= len(file_list)
+    s1_average = s1
+    s1_average.coords = average_coords
+
+    return s1, s1_average, attribute1_array
 
 
 def write_pvalues_to_surface(pvalue_array, s1, filename):

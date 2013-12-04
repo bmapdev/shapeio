@@ -2,6 +2,7 @@
 README.txt
 setup.py
 shapeio/__init__.py
+shapeio/convert.py
 shapeio/curveio.py
 shapeio/dfsio.py
 shapeio/surfio.py

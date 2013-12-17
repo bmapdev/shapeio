@@ -10,7 +10,8 @@ from shapeio import convert
 
 
 surfin = 'shapeio/test/data/test.m'
-surfout = 'shapeio/test/data/test.vtp'
+surfin = '/Volumes/Users/sjoshi/Desktop/DE_132_02_aseg_hippo_Left_edit_smooth_1.0.nii_std_60k_jfeature.m'
+surfout = 'shapeio/test/data/test.ucf'
 
 
 def test_convert_surface():

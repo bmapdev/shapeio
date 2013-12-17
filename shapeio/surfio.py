@@ -94,6 +94,7 @@ def ReadPial(filename):
 
 def WriteUCF(coords,attriblabel,attributes,filename):
     T = coords.shape[0]
+    attributes = np.array(attributes)
     attrib_flag = False
     if len(attributes):
         L = attributes.shape[0]
@@ -459,8 +460,7 @@ def readsurface_new(filename):
         NFV = dfsio.readdfs(filename)
         coords = NFV.vertices
         faces = NFV.faces
-        attributes = []
-        # attributes = NFV.attributes
+        attributes = NFV.attributes
         isMultilevelUCF = False
         return coords,faces,attributes,isMultilevelUCF
 
@@ -633,6 +633,7 @@ def writesurface_new(filename,coords,faces,attributes=[],isMultilevelUCF=False):
         s1 = Surface()
         s1.vertices = coords
         s1.faces = faces
+        s1.attributes = attributes
         # NFV.attributes = attributes
         dfsio.writedfs(filename,s1)
 
@@ -658,6 +659,7 @@ def writesurface_new(filename,coords,faces,attributes=[],isMultilevelUCF=False):
                '.ucf'  : ucf,
                '.vtk'  : vtk,
                '.pial' : pial,
+               '.dfs' : dfs,
     }
     if ext in options:
 #        sys.stdout.write("Writing surface " + filename + "...")
@@ -686,6 +688,54 @@ def aggregate_ucf_attributes(attributes):
         attribues_aggregate = np.append(attribues_aggregate,attributes[i])
 
     return attribues_aggregate
+
+
+def read_aggregated_attributes_from_surfacefilelist(surfacefilelist):
+
+    # Read first file
+    s1 = Surface()
+    s1.read(surfacefilelist[0])
+    if s1.ismultilevelUCF:
+        attributes_new = aggregate_ucf_attributes(s1.attributes)
+    else:
+        attributes_new = s1.attributes
+
+    num_files = len(surfacefilelist)
+    attrib_size = len(attributes_new)
+
+    attribute1_array = np.empty((num_files, attrib_size), 'float')
+    attribute1_array[0, :] = attributes_new
+
+    average_coords = s1.coords
+
+    if s1.ismultilevelUCF:
+        for i in range(1, len(surfacefilelist)):
+            s1.read(surfacefilelist[i])
+            attributes_new = aggregate_ucf_attributes(s1.attributes)
+            if len(attributes_new) != attrib_size:
+                sys.stdout.write("Length of attributes in Files " + surfacefilelist[i] + " and " + surfacefilelist[0]
+                                 + " do not match. Quitting.\n")
+                attribute1_array = []
+                return attribute1_array
+            else:
+                attribute1_array[i, :] = attributes_new
+    else:
+        for i in range(1, len(surfacefilelist)):
+            s1.read(surfacefilelist[i])
+            average_coords += s1.coords
+            if len(s1.attributes) != attrib_size:
+                sys.stdout.write("Length of attributes in Files " + surfacefilelist[i] + " and " + surfacefilelist[0]
+                                 + " do not match. Quitting.\n")
+                attribute1_array = []
+                return attribute1_array
+            else:
+                attribute1_array[i, :] = s1.attributes
+
+    average_coords /= len(surfacefilelist)
+    s1_average = s1
+    s1_average.coords = average_coords
+
+    return s1, s1_average, attribute1_array
 
 
 def read_aggregated_attributes_from_surfaces(filename):

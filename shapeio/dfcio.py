@@ -10,6 +10,9 @@ __email__ = "s.joshi@ucla.edu"
 
 import numpy as np
 import struct
+import os
+import sys
+
 
 def readdfc(filename):
 

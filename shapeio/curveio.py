@@ -97,7 +97,7 @@ def readcurve(filename):
     # return X
 
     def dfc(filename):
-        nCurves,hdr = dfsio.readdfc(filename)
+        nCurves,hdr = dfcio.readdfc(filename)
         attributes = []
         isMultilevelUCF = True
         return nCurves,attributes,isMultilevelUCF

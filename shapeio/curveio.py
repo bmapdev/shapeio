@@ -9,7 +9,7 @@ __email__ = "s.joshi@ucla.edu"
 import os
 import sys
 import numpy as np
-import dfsio
+import dfcio
 import surfio
 import parser
 

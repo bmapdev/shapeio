@@ -6,7 +6,7 @@
 # Packages
 dist
 build
-bin
+
 
 # Pycharm Project
 .idea

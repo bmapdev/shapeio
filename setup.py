@@ -12,6 +12,8 @@ setup(
     version='0.1dev',
     packages=['shapeio'],
     license='TBD',
-    exclude_package_data = {'': ['.gitignore','.idea']}
+    exclude_package_data={'': ['.gitignore','.idea']},
+    scripts=['bin/convert_curve_format.py',
+             'bin/convert_surf_format.py'],
 #    long_description=open('README.txt').read(),
 )

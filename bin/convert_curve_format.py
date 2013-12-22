@@ -3,8 +3,9 @@
 """This program converts one surface format to another. Supported formats are vtp, ucf, pial"""
 
 __author__ = "Shantanu H. Joshi"
-__copyright__   = "Copyright 2012, Shantanu H. Joshi Laboratory of Neuro Imaging"
-
+__copyright__ = "Copyright 2013, Shantanu H. Joshi, Ahmanson Lovelace Brain Mapping Center" \
+                "University of California Los Angeles"
+__email__ = "s.joshi@ucla.edu"
 
 import os
 import sys

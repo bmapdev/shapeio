@@ -45,7 +45,7 @@ def readdfs(fname):
     if (hdr.vcoffset > 0):
         #print 'reading vertex colors.'
         fid.seek(hdr.vcoffset)
-        NFV.vcolor = np.array(struct.unpack('f' * 3 * hdr.nVertices, fid.read(3 * hdr.nVertices * 4)),
+        NFV.vColor = np.array(struct.unpack('f' * 3 * hdr.nVertices, fid.read(3 * hdr.nVertices * 4)),
                               dtype='float32').reshape(hdr.nVertices, 3)
     if (hdr.uvStart > 0):
         #print 'reading uv coordinates.'
@@ -89,8 +89,8 @@ def writedfs(fname,NFV):
         #print 'has normals'
         normals = nextarraypos
         nextarraypos = nextarraypos + nVertices * 12 #12 bytes per normal vector (3 x float32)
-    if (hasattr(NFV, 'vcolor')):
-        #'has vcolor'
+    if (hasattr(NFV, 'vColor')):
+        #'has vColor'
         vcoffset = nextarraypos
         nextarraypos = nextarraypos + nVertices * 12 # 12 bytes per color coordinate (3 x float32)
     if (hasattr(NFV, 'u') and hasattr(NFV, 'v')):

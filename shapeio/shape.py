@@ -50,7 +50,7 @@ class Shape(object):
         if Shape.datatype[ext] == 'curve':
             curveio.writecurve(filename, shapeobj.coords, shapeobj.attributes, shapeobj.isMultilevelUCF)
         elif Shape.datatype[ext] == 'surface':
-            surfio.writesurface_new(filename, shapeobj.coords, shapeobj.faces, shapeobj.attributes, shapeobj.isMultilevelUCF)
+            surfio.writesurface_new(filename, shapeobj.coords, shapeobj.faces, shapeobj.attributes)
 
     @staticmethod
     def read_aggregated_attributes_from_shapefilelist(shapefilelist):

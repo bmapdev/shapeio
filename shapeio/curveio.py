@@ -249,6 +249,56 @@ def WriteUCFMultipleLevelsWithData(filename,coords,attributes):
     sys.stdout.write("Done.\n")
     return
 
+def write_vtp_XMLPolydata(filename, coords, attributes = []):
+
+    if len(attributes) > 0:
+        if len(attributes) != coords.shape[0]:
+            sys.stdout.write("Mismatch in the length of attributes and the length of vertices of the mesh\n")
+            return None
+        else:
+            attrib_flag = True
+    else:
+        attrib_flag = False
+
+    fid = open(filename, 'wt')
+    fid.write('<?xml version="1.0"?>\n')
+    fid.write('<VTKFile type="PolyData" version="0.1" byte_order="LittleEndian">\n')
+    fid.write('<PolyData>\n')
+    fid.write('<!-- Curve index=1 -->\n')
+    fid.write('<Piece NumberOfPoints="{0:d}" NumberOfVerts="0" NumberOfLines="{1:d}" NumberOfStrips="0" NumberOfPolys="0">\n'.format(len(attributes), 1))
+    fid.write('<Points>\n')
+    fid.write('<DataArray type="Float32" NumberOfComponents="3" format="ascii">\n')
+    # fid.write("\n".join(str(elem) for elem in coords))
+    for jj in np.arange(0,coords.shape[0]):
+        fid.write("{0:f} {1:f} {2:f}\n".format(float(coords[jj][0]), float(coords[jj][1]), float(coords[jj][2])))
+    fid.write('</DataArray>\n')
+    fid.write('</Points>\n')
+
+    if attrib_flag:
+        fid.write('<PointData Scalars="label">\n')
+        fid.write('<DataArray type="Float32" Name="label" format="ascii">\n')
+        for jj in xrange(0, len(attributes)):
+            fid.write('{0:f} '.format(float(attributes[jj])))
+        fid.write('\n</DataArray>\n')
+        fid.write('</PointData>\n')
+
+    fid.write('<Lines>\n')
+    fid.write('<DataArray type="Int32" Name="connectivity" format="ascii">\n')
+
+    for jj in xrange(0, len(attributes)):
+        fid.write('{0:d} '.format(int(jj)))
+
+    fid.write('\n</DataArray>\n')
+    fid.write('<DataArray type="Int32" Name="offsets" format="ascii">\n')
+    fid.write(str(len(attributes)) + '\n')
+    fid.write('</DataArray>\n')
+    fid.write('</Lines>\n')
+    fid.write('</Piece>\n')
+
+    fid.write('</PolyData>\n')
+    fid.write('</VTKFile>\n')
+    fid.close()
+    return
 
 def ReadSVG(filename):
 
@@ -288,9 +338,14 @@ def writecurve(filename, coords, attributes=[], isMultilevelUCF=False):
         else:
             WriteUCF(coords,'',attributes,filename)
 
+    def vtp(filename):
+        write_vtp_XMLPolydata(filename, coords, attributes)
+
+
     path_filename,ext = os.path.splitext(filename)
 
     options = {'.ucf': ucf,
+               '.vtp': vtp,
               }
 
     if ext in options:

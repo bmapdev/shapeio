@@ -9,9 +9,10 @@ __email__ = "s.joshi@ucla.edu"
 
 import os
 import sys
-import curveio
+from shapeio import curveio
+from shapeio import convert
 import argparse
-import numpy as np
+
 
 def main():
 
@@ -19,26 +20,9 @@ def main():
     parser.add_argument('-curvein',dest='curvein',help='input curve [ucf,vtp,svg]',required=True)
     parser.add_argument('-curveout',dest='curveout',help='output curve [ucf]',required=True)
     args = parser.parse_args()
-
-    ConvertCurveFormat(args.curvein,args.curveout)
-
-    return None
-
-def ConvertCurveFormat(curvein,curveout):
-
-    sin_name,sin_ext = os.path.splitext(curvein)
-    sout_name,sout_ext = os.path.splitext(curveout)
-
-    if curvein == curveout:
-        sys.stdout.write("Error: Same input and output formats " + sin_ext + ". Exiting without saving anything...")
-        return None
-
-    X,attributes,isMultilevelUCF = curveio.readcurve(curvein)
-
-    curveio.writecurve(curveout,X,attributes,isMultilevelUCF)
+    convert.curve_format(args.curvein, args.curveout)
 
     return None
-
 
 if __name__ == '__main__':
     main()

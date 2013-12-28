@@ -8,5 +8,6 @@ shapeio/convert.py
 shapeio/curveio.py
 shapeio/dfcio.py
 shapeio/dfsio.py
+shapeio/shape.py
 shapeio/surfio.py
 shapeio/vtkio.py

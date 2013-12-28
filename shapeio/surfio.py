@@ -418,63 +418,6 @@ def ReadUCFMultipleLevelsWithData(filename):
     fid.close()
     return X,attributes
 
-def WriteUCFMultipleLevelsWithData(filename,coords,attributes):
-    # coords and attributes are now lists
-
-    N = len(coords)
-    T = len(coords[0])
-    attrib_flag = False
-    if len(attributes):
-        L = len(attributes[0])
-        if L == T:
-            attrib_flag = True
-        else:
-            sys.stdout.write("Mismatch in the length of attributes and the length of vertices of the mesh\n")
-            return None
-    else:
-        L = 0
-
-    # if data is less than 3 dimensional, convert it to 3D
-    #TBD
-
-    sys.stdout.write('Writing ucf file ' + filename + '...')
-    f = open(filename,'wt')
-    f.write('#UCF created by surfio\n')
-    f.write('<width=>\n')
-    f.write('64\n')
-    f.write('<height=>\n')
-    f.write('146\n')
-    f.write('<xrange=>\n')
-    f.write("{0:f} {1:f}\n".format(0,0))
-    f.write('<yrange=>\n')
-    f.write("{0:f} {1:f}\n".format(0,0))
-    f.write('<zrange=>\n')
-    f.write("{0:f} {1:f}\n".format(0,0))
-    f.write('<levels>\n');
-    f.write('{0:d}\n'.format(N));
-
-    for ii in range(0,N):
-        f.write('<level number=>\n');
-        f.write('{0:f}\n'.format(ii));
-        f.write('<point_num=>\n');
-        f.write("{0:d}\n".format(len(coords[ii])));
-        f.write('<contour_data=>\n');
-
-        if attrib_flag:
-            for jj in range(0,len(coords[ii])):
-                f.write("{0:f} {1:f} {2:f} {3:f}\n".format(float(coords[ii][jj][0]),float(coords[ii][jj][1]),float(coords[ii][jj][2]),float(attributes[ii][jj])))
-        else:
-            for jj in np.arange(0,len(coords[ii])):
-                f.write("{0:f} {1:f} {2:f}\n".format(float(coords[ii][jj][0]),float(coords[ii][jj][1]),float(coords[ii][jj][2])))
-
-        f.write('<end of level>\n')
-
-
-    f.write('<end>\n');
-    f.close()
-    sys.stdout.write("Done.\n")
-    return
-
 
 def Read(filename):
 
@@ -660,7 +603,8 @@ def writesurface(filename,coords,faces,attributes):
 def writesurface_new(filename,coords,faces,attributes=[],isMultilevelUCF=False):
 
     def mincobj(filename):
-        write_mincobj(coords, faces, attributes, filename)
+        pass
+        # write_mincobj(coords, faces, attributes, filename)
 
     def vtp(filename):
         vtkio.WriteVTK_XML_Polydata_old(filename,coords,faces,'',attributes)
@@ -678,10 +622,7 @@ def writesurface_new(filename,coords,faces,attributes=[],isMultilevelUCF=False):
 
 
     def ucf(filename):
-        if isMultilevelUCF:
-            WriteUCFMultipleLevelsWithData(filename,coords,attributes)
-        else:
-            WriteUCF(coords,'',attributes,filename)
+        WriteUCF(coords, '', attributes, filename)
 
     def vtk(filename):
         sys.stdout.write("Not implemented.")

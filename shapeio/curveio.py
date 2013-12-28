@@ -10,8 +10,9 @@ import os
 import sys
 import numpy as np
 import dfcio
-import surfio
 import parser
+import bs4
+
 
 def ReadUCFMultipleLevelsWithData(filename):
     """Read UCF file.
@@ -152,15 +153,11 @@ def readcurve(filename):
 def WriteUCF(coords,attriblabel,attributes,filename):
     T = coords.shape[0]
     attrib_flag = False
-    if len(attributes):
-        L = attributes.shape[0]
-        if L == T:
-            attrib_flag = True
-        else:
-            sys.stdout.write("Mismatch in the length of attributes and the length of vertices of the mesh\n")
-            return None
+    if len(attributes) == T:
+        attrib_flag = True
     else:
-        L = 0
+        sys.stdout.write("Mismatch in the length of attributes and the length of vertices of the mesh\n")
+        return None
 
     sys.stdout.write('Writing ucf file ' + filename + '...')
     f = open(filename,'wt')
@@ -195,9 +192,67 @@ def WriteUCF(coords,attriblabel,attributes,filename):
     f.close()
     sys.stdout.write("Done.\n")
 
+def WriteUCFMultipleLevelsWithData(filename,coords,attributes):
+    # coords and attributes are now lists
+
+    N = len(coords)
+    T = len(coords[0])
+    attrib_flag = False
+    if len(attributes):
+        L = len(attributes[0])
+        if L == T:
+            attrib_flag = True
+        else:
+            sys.stdout.write("Mismatch in the length of attributes and the length of vertices of the mesh\n")
+            return None
+    else:
+        L = 0
+
+    # if data is less than 3 dimensional, convert it to 3D
+    #TBD
+
+    sys.stdout.write('Writing ucf file ' + filename + '...')
+    f = open(filename,'wt')
+    f.write('#UCF created by surfio\n')
+    f.write('<width=>\n')
+    f.write('64\n')
+    f.write('<height=>\n')
+    f.write('146\n')
+    f.write('<xrange=>\n')
+    f.write("{0:f} {1:f}\n".format(0,0))
+    f.write('<yrange=>\n')
+    f.write("{0:f} {1:f}\n".format(0,0))
+    f.write('<zrange=>\n')
+    f.write("{0:f} {1:f}\n".format(0,0))
+    f.write('<levels>\n');
+    f.write('{0:d}\n'.format(N));
+
+    for ii in range(0,N):
+        f.write('<level number=>\n');
+        f.write('{0:f}\n'.format(ii));
+        f.write('<point_num=>\n');
+        f.write("{0:d}\n".format(len(coords[ii])));
+        f.write('<contour_data=>\n');
+
+        if attrib_flag:
+            for jj in range(0,len(coords[ii])):
+                f.write("{0:f} {1:f} {2:f} {3:f}\n".format(float(coords[ii][jj][0]),float(coords[ii][jj][1]),float(coords[ii][jj][2]),float(attributes[ii][jj])))
+        else:
+            for jj in np.arange(0,len(coords[ii])):
+                f.write("{0:f} {1:f} {2:f}\n".format(float(coords[ii][jj][0]),float(coords[ii][jj][1]),float(coords[ii][jj][2])))
+
+        f.write('<end of level>\n')
+
+
+    f.write('<end>\n');
+    f.close()
+    sys.stdout.write("Done.\n")
+    return
+
+
 def ReadSVG(filename):
 
-    soup = BeautifulSoup(open(filename))
+    soup = bs4.BeautifulSoup(open(filename))
 
     # Select the maximum length curve
     all_paths = soup.findAll('path')
@@ -224,17 +279,18 @@ def ReadSVG(filename):
 
     return X,attributes
 
-def writecurve(filename,coords,attributes=[],isMultilevelUCF=False):
+
+def writecurve(filename, coords, attributes=[], isMultilevelUCF=False):
 
     def ucf(filename):
         if isMultilevelUCF:
-            surfio.WriteUCFMultipleLevelsWithData(filename,coords,attributes)
+            WriteUCFMultipleLevelsWithData(filename,coords,attributes)
         else:
             WriteUCF(coords,'',attributes,filename)
 
     path_filename,ext = os.path.splitext(filename)
 
-    options = {'.ucf'  : ucf,
+    options = {'.ucf': ucf,
               }
 
     if ext in options:
@@ -244,3 +300,22 @@ def writecurve(filename,coords,attributes=[],isMultilevelUCF=False):
     else:
         sys.stdout.write("Output format " + ext + " not supported. Exiting without saving.\n")
         return None
+
+
+class Curve(object):
+
+    def __init__(self, coords=[], isMultilevelUCF=False, attributes=[]):
+        self.coords = coords
+        self.attributes = attributes
+        self.isMultilevelUCF = isMultilevelUCF
+
+    def read(self, filename):
+        self.coords, self.attributes, self.isMultilevelUCF = readcurve(filename)
+
+    def write(self, filename):
+        writecurve(filename, self.coords, self.attributes, self.isMultilevelUCF)
+
+    @staticmethod
+    def readfile(filename):
+        coords, attributes, isMultilevelUCF = readcurve(filename)
+        return Curve(coords, isMultilevelUCF, attributes)

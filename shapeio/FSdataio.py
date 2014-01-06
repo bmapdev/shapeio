@@ -9,6 +9,7 @@ __email__ = "s.joshi@ucla.edu"
 
 import numpy as np
 from struct import unpack
+from os import path
 
 
 def load_mgh(filename):
@@ -31,3 +32,13 @@ def load_mgh(filename):
     nvoxels = dim1 * dim2 * dim3 * frames
     data = np.array(unpack('>' + fmt_string*nvoxels, fobj.read(nvoxels*bytes_per_voxel)), dtype='float32')
     return data
+
+
+def readdata(filename):
+
+    path_filename, ext = path.splitext(filename)
+    options = {'.mgh': load_mgh,
+               }
+    if ext in options:
+        data = options[ext](filename)
+        return data

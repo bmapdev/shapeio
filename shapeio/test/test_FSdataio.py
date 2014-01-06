@@ -13,6 +13,11 @@ filename = 'shapeio/test/data/bert.lh.thickness.mgh'
 def test_load_mgh():
     data = FSdataio.load_mgh(filename)
 
+def test_load():
+    data = FSdataio.readdata(filename)
+    return
+
 if __name__ == "__main__":
     test_load_mgh()
+    test_load()
 

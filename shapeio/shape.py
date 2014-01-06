@@ -12,6 +12,7 @@ import curveio
 import numpy as np
 import sys
 import pandas
+import FSdataio
 
 
 class Shape(object):
@@ -22,7 +23,9 @@ class Shape(object):
     datatype = {'.dfs': 'surface',
                 '.dfc': 'curve,',
                 '.ucf': 'curve',
-                '.vtp': 'surface'}
+                '.vtp': 'surface',
+                '.mgh': 'FSdata',
+                }
 
     @staticmethod
     def readfile(filename):
@@ -37,6 +40,10 @@ class Shape(object):
         elif Shape.datatype[ext] == 'surface':
             shapobj = surfio.Surface.readfile(filename)
             return shapobj
+        elif Shape.datatype[ext] == 'FSdata':
+            shapeobj = surfio.Surface(coords=0, faces=0, ismultilevelUCF=False)
+            shapeobj.attributes = FSdataio.load_mgh(filename)
+            return shapeobj
         else:
             sys.stdout.write('Error: Unsupported data type. Supported data types are: ' + ', '.join(Shape.datatype.keys()))
 

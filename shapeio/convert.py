@@ -11,9 +11,11 @@ import sys
 from shapeio import surfio
 from shapeio import curveio
 import numpy as np
+import FSdataio
+from shape import Shape
 
 
-def surface_format(surfin, surfout, surf_conn="", xfm=""):
+def surface_format(surfin, surfout, overlay="", surf_conn="", xfm=""):
     sin_name, sin_ext = os.path.splitext(surfin)
 
     if surfin == surfout:
@@ -33,6 +35,10 @@ def surface_format(surfin, surfout, surf_conn="", xfm=""):
     in_coords, temp_faces, in_attributes, isMultilevelUCF = surfio.readsurface_new(surfin)
     if not len(in_faces):
         in_faces = temp_faces
+
+    if overlay != "":
+        overlayobj = Shape.readfile(overlay)
+        in_attributes = overlayobj.attributes
 
     if xfm != "":
         sys.stdout.write("Applying transform..." + xfm + "\n")

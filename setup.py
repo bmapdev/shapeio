@@ -14,6 +14,8 @@ setup(
     license='TBD',
     exclude_package_data={'': ['.gitignore','.idea']},
     scripts=['bin/convert_curve_format.py',
-             'bin/convert_surf_format.py'],
+             'bin/convert_surf_format.py',
+             'bin/subtract_surf_attributes.py',
+             ],
 #    long_description=open('README.txt').read(),
 )

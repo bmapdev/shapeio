@@ -3,6 +3,7 @@ README.txt
 setup.py
 bin/convert_curve_format.py
 bin/convert_surf_format.py
+bin/subtract_surf_attributes.py
 shapeio/FSdataio.py
 shapeio/__init__.py
 shapeio/convert.py

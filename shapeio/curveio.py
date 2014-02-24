@@ -153,11 +153,12 @@ def readcurve(filename):
 def WriteUCF(coords,attriblabel,attributes,filename):
     T = coords.shape[0]
     attrib_flag = False
-    if len(attributes) == T:
-        attrib_flag = True
-    else:
-        sys.stdout.write("Mismatch in the length of attributes and the length of vertices of the mesh\n")
-        return None
+    if len(attributes) != 0:
+        if len(attributes) == T:
+            attrib_flag = True
+        else:
+            sys.stdout.write("Mismatch in the length of attributes and the length of vertices of the mesh\n")
+            return None
 
     sys.stdout.write('Writing ucf file ' + filename + '...')
     f = open(filename,'wt')

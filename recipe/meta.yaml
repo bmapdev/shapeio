@@ -11,3 +11,8 @@ requirements:
     run:
         - python
         - pandas
+        - vtk
+        - numpy
+
+build:
+     number: 1

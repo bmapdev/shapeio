@@ -11,7 +11,7 @@ import sys
 import numpy as np
 import dfcio
 import parser
-import bs4
+#import bs4
 
 
 def ReadUCFMultipleLevelsWithData(filename):

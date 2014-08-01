@@ -8,9 +8,6 @@ __email__ = "s.joshi@ucla.edu"
 
 import sys
 import numpy as np
-from traits.etsconfig.api import ETSConfig
-# ETSConfig.toolkit = 'null'
-# from tvtk.api import tvtk
 import vtk
 from vtk.util import numpy_support
 

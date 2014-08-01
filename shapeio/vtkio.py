@@ -49,7 +49,10 @@ def ReadVTK_XML_Polydata(vtkfile):
     attributes = []
     # TODO Perhps return the array by name in the future
     if pointdata.GetNumberOfArrays() >= 1:  # Attributes present
-        attributes = numpy_support.vtk_to_numpy(pointdata.GetArray(0))
+        if pointdata.HasArray('VoxelData'):  # If VoxelData present use it or else pick the first array
+            attributes = numpy_support.vtk_to_numpy(pointdata.GetArray('VoxelData'))
+        else:
+            attributes = numpy_support.vtk_to_numpy(pointdata.GetArray(0))
 
     temp_faces = numpy_support.vtk_to_numpy(mesh.GetPolys().GetData())
 

@@ -8,154 +8,104 @@ __email__ = "s.joshi@ucla.edu"
 
 import sys
 import numpy as np
-from vtk import vtkXMLPolyDataReader
 from traits.etsconfig.api import ETSConfig
-ETSConfig.toolkit = 'null'
-from tvtk.api import tvtk
+# ETSConfig.toolkit = 'null'
+# from tvtk.api import tvtk
+import vtk
+from vtk.util import numpy_support
+
 
 def ReadVTK_Polydata(vtkfile):
+    reader = vtk.vtkPolyDataReader()
+    reader.SetFileName(vtkfile)
+    reader.Update()
 
-    reader = tvtk.PolyDataReader(file_name=vtkfile)
-    reader.update()
-    mesh = reader.get_output()
-    coords = mesh._get_points().to_array()
-    face_temp_data = mesh._get_polys()._get_data().to_array()
-    num_faces = mesh._get_polys().number_of_cells
-    faces = np.array((num_faces,3))
-    strides = np.arange(0,len(face_temp_data),4)
-    faces = np.delete(face_temp_data,strides)
-    faces = np.reshape(faces,(num_faces,3))
+    mesh = reader.GetOutput()
+    coords = numpy_support.vtk_to_numpy(mesh.GetPoints().GetData())
+    pointdata = mesh.GetPointData()
+
     attributes = []
-    if mesh._get_point_data().scalars != None:
-        attributes = mesh._get_point_data().scalars.to_array()
+    # TODO Perhps return the array by name in the future
+    if pointdata.GetNumberOfArrays() >= 1:  # Attributes present
+        attributes = numpy_support.vtk_to_numpy(pointdata.GetArray(0))
 
-        #for i in np.arange(0,num_faces):
-        #   face_temp_data.
+    temp_faces = numpy_support.vtk_to_numpy(mesh.GetPolys().GetData())
 
-    sys.stdout.write("Done.\n")
-    #attributes = []
+    num_faces = mesh.GetPolys().GetNumberOfCells()
+    strides = np.arange(0, len(temp_faces), 4)
+    faces = np.delete(temp_faces, strides)
+    faces = np.reshape(faces, (num_faces, 3))
 
-    return coords,faces,attributes
-
-def ReadVTK_XML_Polydata_with_attribute(vtkfile,attriblabel):
-
-    sys.stdout.write("Reading VTK XML Polydata (Assuming triangular mesh)...")
-    reader = tvtk.XMLPolyDataReader(file_name=vtkfile)
-    reader.update()
-    mesh = tvtk.PolyData()
-    mesh = reader.get_output()
-
-    coords = mesh._get_points().to_array()
-    face_temp_data = mesh._get_polys()._get_data().to_array()
-    num_faces = mesh._get_polys().number_of_cells
-
-    vtkarray = mesh._get_point_data().get_array(attriblabel)
-    attributes = np.zeros(len(vtkarray))
-    ctr = 0;
-    for i in vtkarray:
-        attributes[ctr] = i
-        ctr += 1
-
-    #for i in np.arange(0,num_faces):
-     #   face_temp_data.
-    faces = np.array((num_faces,3))
-    strides = np.arange(0,len(face_temp_data),4)
-    faces = np.delete(face_temp_data,strides)
-    faces = np.reshape(faces,(num_faces,3))
-
-    sys.stdout.write("Done.\n")
-    #attributes = []
-    return coords,faces,attributes
+    return coords, faces, attributes
 
 
 def ReadVTK_XML_Polydata(vtkfile):
 
     sys.stdout.write("Reading VTK XML Polydata (Assuming triangular mesh)...")
-    reader = tvtk.XMLPolyDataReader(file_name=vtkfile)
-    reader.update()
-    mesh = tvtk.PolyData()
-    mesh = reader.get_output()
-
-    coords = mesh._get_points().to_array()
-    face_temp_data = mesh._get_polys()._get_data().to_array()
-    num_faces = mesh._get_polys().number_of_cells
-    attributes = []
-    if mesh._get_point_data()._get_number_of_arrays() == 1:
-        attributes = mesh._get_point_data().scalars.to_array()
-    elif mesh._get_point_data()._get_number_of_arrays() > 1:
-        attributes = mesh._get_point_data().get_array('VoxelData').to_array()
-        # attributes = mesh._get_point_data().to_array()
-
-    # if mesh._get_point_data()._get_number_of_arrays() > 1:
-    #     for i in range(0,mesh._get_point_data()._get_number_of_arrays()):
-    #         vtkarray = mesh._get_point_data().get_array(i)
-
-
-    #for i in np.arange(0,num_faces):
-     #   face_temp_data.
-    faces = np.array((num_faces,3))
-    strides = np.arange(0,len(face_temp_data),4)
-    faces = np.delete(face_temp_data,strides)
-    faces = np.reshape(faces,(num_faces,3))
-
-    sys.stdout.write("Done.\n")
-    #attributes = []
-    return coords,faces,attributes
-
-def GetVtkObject(vtkfile):
-
-    sys.stdout.write("Reading VTK XML Polydata (Assuming triangular mesh)...")
-    reader = tvtk.XMLPolyDataReader(file_name=vtkfile)
-    reader.update()
-    mesh = tvtk.PolyData()
-    mesh = reader.get_output()
-
-    coords = mesh._get_points().to_array()
-    face_temp_data = mesh._get_polys()._get_data().to_array()
-    num_faces = mesh._get_polys().number_of_cells
-    attributes = []
-    # if mesh._get_point_data().get_array('cn')
-    if mesh._get_point_data()._get_number_of_arrays() > 0:
-        pass
-
-    if mesh._get_point_data().scalars != None:
-        attributes = mesh._get_point_data().scalars.to_array()
-
-        #for i in np.arange(0,num_faces):
-        #   face_temp_data.
-    faces = np.array((num_faces,3))
-    strides = np.arange(0,len(face_temp_data),4)
-    faces = np.delete(face_temp_data,strides)
-    faces = np.reshape(faces,(num_faces,3))
-
-    sys.stdout.write("Done.\n")
-    #attributes = []
-    return mesh
-
-
-def ReadVTK_XML_Polydata_old(vtkfile):
-    #Read it
-    reader = vtkXMLPolyDataReader()
+    reader = vtk.vtkXMLPolyDataReader()
     reader.SetFileName(vtkfile)
     reader.Update()
-    polydata = reader.GetOutput()
-    #Display arrays
-    #print vtk_to_array(polydata.GetPoints().GetData())
-    #print vtk_to_array(polydata.GetPolys().GetData())
-    return polydata
+    mesh = reader.GetOutput()
+    coords = numpy_support.vtk_to_numpy(mesh.GetPoints().GetData())
+    pointdata = mesh.GetPointData()
 
-def WriteVTK_XML_Polydatanew(vtkfile,coords,faces,attriblabel,attrib,ascii_flag=True):
-    mesh = tvtk.PolyData(points=coords, polys=faces)
-    mesh.point_data.add_array(attrib)
+    attributes = []
+    # TODO Perhps return the array by name in the future
+    if pointdata.GetNumberOfArrays() >= 1:  # Attributes present
+        attributes = numpy_support.vtk_to_numpy(pointdata.GetArray(0))
 
-    # mesh.point_data.scalars.name = 'data'
+    temp_faces = numpy_support.vtk_to_numpy(mesh.GetPolys().GetData())
 
-    writer = tvtk.XMLPolyDataWriter(file_name=vtkfile,input=mesh)
-    if ascii_flag:
-        writer.data_mode = 0
-    else:
-        writer.data_mode = 2
-    writer.write()
+    num_faces = mesh.GetPolys().GetNumberOfCells()
+    strides = np.arange(0, len(temp_faces), 4)
+    faces = np.delete(temp_faces, strides)
+    faces = np.reshape(faces, (num_faces, 3))
+
+    return coords, faces, attributes
+
+# def GetVtkObject(vtkfile):
+#
+#     sys.stdout.write("Reading VTK XML Polydata (Assuming triangular mesh)...")
+#     reader = tvtk.XMLPolyDataReader(file_name=vtkfile)
+#     reader.update()
+#     mesh = tvtk.PolyData()
+#     mesh = reader.get_output()
+#
+#     coords = mesh._get_points().to_array()
+#     face_temp_data = mesh._get_polys()._get_data().to_array()
+#     num_faces = mesh._get_polys().number_of_cells
+#     attributes = []
+#     # if mesh._get_point_data().get_array('cn')
+#     if mesh._get_point_data()._get_number_of_arrays() > 0:
+#         pass
+#
+#     if mesh._get_point_data().scalars != None:
+#         attributes = mesh._get_point_data().scalars.to_array()
+#
+#         #for i in np.arange(0,num_faces):
+#         #   face_temp_data.
+#     faces = np.array((num_faces,3))
+#     strides = np.arange(0,len(face_temp_data),4)
+#     faces = np.delete(face_temp_data,strides)
+#     faces = np.reshape(faces,(num_faces,3))
+#
+#     sys.stdout.write("Done.\n")
+#     #attributes = []
+#     return mesh
+
+
+# def WriteVTK_XML_Polydatanew(vtkfile,coords,faces,attriblabel,attrib,ascii_flag=True):
+#     mesh = tvtk.PolyData(points=coords, polys=faces)
+#     mesh.point_data.add_array(attrib)
+#
+#     # mesh.point_data.scalars.name = 'data'
+#
+#     writer = tvtk.XMLPolyDataWriter(file_name=vtkfile,input=mesh)
+#     if ascii_flag:
+#         writer.data_mode = 0
+#     else:
+#         writer.data_mode = 2
+#     writer.write()
 
 def WriteVTK_XML_Polydata_old(vtkfile,coords,faces,attriblabel,attrib,ascii_flag=True):
 

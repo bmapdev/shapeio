@@ -91,9 +91,16 @@ class Shape(object):
 
         return s1, s1_average, attribute1_array
 
-
     @staticmethod
     def read_aggregated_attributes_from_surfaces(filename):
         data_list = pandas.read_table(filename, sep='\t')
-        shapefile_list = data_list['File']
+
+        try:
+            shapefile_list = data_list['File']
+        except KeyError:
+            #  This means a column called File is not found.
+            #  Treat the file as a simple flat file with a list of file names
+            fid = open(filename, 'rt')
+            shapefile_list = [i.strip('\n') for i in fid.readlines()]
+
         return Shape.read_aggregated_attributes_from_shapefilelist(shapefile_list)

@@ -54,9 +54,9 @@ class Shape(object):
             sys.stdout.write('Error: Unsupported data type. Supported data types are: ' + ', '.join(Shape.datatype.keys()))
             return
 
-        if Shape.datatype[ext] == 'curve':
+        if type(shapeobj) is curveio.Curve:
             curveio.writecurve(filename, shapeobj.coords, shapeobj.attributes, shapeobj.isMultilevelUCF)
-        elif Shape.datatype[ext] == 'surface':
+        elif type(shapeobj) is surfio.Surface:
             surfio.writesurface_new(filename, shapeobj.coords, shapeobj.faces, shapeobj.attributes)
 
     @staticmethod

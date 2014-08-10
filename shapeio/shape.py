@@ -104,3 +104,22 @@ class Shape(object):
             shapefile_list = [i.strip('\n') for i in fid.readlines()]
 
         return Shape.read_aggregated_attributes_from_shapefilelist(shapefile_list)
+
+    @staticmethod
+    def determine_file_extension(filename, contains_filelist=False):
+        # Determine the file extension
+        ext = ''
+
+        if contains_filelist:
+            data_list = pandas.read_table(filename, sep='\t')
+            try:
+                shapefile_list = data_list['File']
+            except KeyError:
+                #  This means a column called File is not found.
+                #  Treat the file as a simple flat file with a list of file names
+                fid = open(filename, 'rt')
+                filename = fid.readline().strip('\n')
+                root, ext = os.path.splitext(filename)
+        else:
+            root, ext = os.path.splitext(filename)
+        return ext

@@ -63,49 +63,32 @@ def ReadVTK_XML_Polydata(vtkfile):
 
     return coords, faces, attributes
 
-# def GetVtkObject(vtkfile):
-#
-#     sys.stdout.write("Reading VTK XML Polydata (Assuming triangular mesh)...")
-#     reader = tvtk.XMLPolyDataReader(file_name=vtkfile)
-#     reader.update()
-#     mesh = tvtk.PolyData()
-#     mesh = reader.get_output()
-#
-#     coords = mesh._get_points().to_array()
-#     face_temp_data = mesh._get_polys()._get_data().to_array()
-#     num_faces = mesh._get_polys().number_of_cells
-#     attributes = []
-#     # if mesh._get_point_data().get_array('cn')
-#     if mesh._get_point_data()._get_number_of_arrays() > 0:
-#         pass
-#
-#     if mesh._get_point_data().scalars != None:
-#         attributes = mesh._get_point_data().scalars.to_array()
-#
-#         #for i in np.arange(0,num_faces):
-#         #   face_temp_data.
-#     faces = np.array((num_faces,3))
-#     strides = np.arange(0,len(face_temp_data),4)
-#     faces = np.delete(face_temp_data,strides)
-#     faces = np.reshape(faces,(num_faces,3))
-#
-#     sys.stdout.write("Done.\n")
-#     #attributes = []
-#     return mesh
 
+def write_vtk_xml_polydata_curve(filename, coords, attributes = []):
+    if coords.shape[0] < coords.shape[1]:
+        coords = coords.T
 
-# def WriteVTK_XML_Polydatanew(vtkfile,coords,faces,attriblabel,attrib,ascii_flag=True):
-#     mesh = tvtk.PolyData(points=coords, polys=faces)
-#     mesh.point_data.add_array(attrib)
-#
-#     # mesh.point_data.scalars.name = 'data'
-#
-#     writer = tvtk.XMLPolyDataWriter(file_name=vtkfile,input=mesh)
-#     if ascii_flag:
-#         writer.data_mode = 0
-#     else:
-#         writer.data_mode = 2
-#     writer.write()
+    coords = coords.copy()  # To ensure C_CONTIGUOUS is True
+
+    polydata = vtk.vtkPolyData()
+    points = vtk.vtkPoints()
+
+    points.SetData(numpy_support.numpy_to_vtk(coords))
+    polydata.SetPoints(points)
+
+    lines = vtk.vtkCellArray()
+    lines.InsertNextCell(coords.shape[0])
+    for i in np.arange(coords.shape[0]):
+        lines.InsertCellPoint(i)
+
+    polydata.SetLines(lines)
+
+    writer = vtk.vtkXMLPolyDataWriter()
+    writer.SetInput(polydata)
+    writer.SetFileName(filename)
+    writer.SetDataModeToAscii()
+    writer.Write()
+
 
 def WriteVTK_XML_Polydata_old(vtkfile,coords,faces,attriblabel,attrib,ascii_flag=True):
 

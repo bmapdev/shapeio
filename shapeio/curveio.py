@@ -11,6 +11,7 @@ import sys
 import numpy as np
 import dfcio
 import parser
+import vtkio
 #import bs4
 
 
@@ -340,7 +341,7 @@ def writecurve(filename, coords, attributes=[], isMultilevelUCF=False):
             WriteUCF(coords,'',attributes,filename)
 
     def vtp(filename):
-        write_vtp_XMLPolydata(filename, coords, attributes)
+        vtkio.write_vtk_xml_polydata_curve(filename, coords, attributes)
 
 
     path_filename,ext = os.path.splitext(filename)

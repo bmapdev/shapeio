@@ -129,19 +129,24 @@ def write_vtk_xml_polydata_curve_set(filename, coords_set, attributes = []):
 
 def write_multilevel_polyline_to_vtp(filename, coords_set, attributes = []):
     levels = len(coords_set)
+
+    # First format all coords in coords_set to be tall instead of wide
+    for ii in np.arange(levels):
+        if coords_set[ii].shape[0] < coords_set[ii].shape[1]:
+            coords_set[ii] = coords_set[ii].T.copy()
+
     fid = open(filename, mode='wt')
     fid.write('<?xml version="1.0"?>\n')
     fid.write('<VTKFile type="PolyData" version="0.1" byte_order="LittleEndian">\n')
     fid.write('<PolyData>\n')
 
-
-    T = coords_set[0].shape[0]
-    idx = np.arange(T)
-    g = [''.join(str(i)) for i in idx]
-    idx_str = ' '.join(g)
-
     for ii in np.arange(levels):
         coords = coords_set[ii]
+        T = coords.shape[0]
+        idx = np.arange(T)
+        g = [''.join(str(i)) for i in idx]
+        idx_str = ' '.join(g)
+
         fid.write('<Piece NumberOfPoints="{0}" NumberOfVerts="0" NumberOfLines="1" NumberOfStrips="0" NumberOfPolys="0">\n'.format(T))
         fid.write('<Points>\n')
         fid.write('<DataArray type="Float32" NumberOfComponents="3" format="ascii">\n')

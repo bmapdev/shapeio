@@ -90,6 +90,82 @@ def write_vtk_xml_polydata_curve(filename, coords, attributes = []):
     writer.Write()
 
 
+def write_vtk_xml_polydata_curve_set(filename, coords_set, attributes = []):
+    levels = len(coords_set)
+
+
+    vtkmultipieceobj = vtk.vtkMultiPieceDataSet()
+    vtkmultipieceobj.SetNumberOfPieces(levels)
+
+    for ii in np.arange(levels):
+
+        coords = coords_set[ii]
+
+        if coords.shape[0] < coords.shape[1]:
+            coords = coords.T
+
+        coords = coords.copy()  # To ensure C_CONTIGUOUS is True
+
+        polydata = vtk.vtkPolyData()
+        points = vtk.vtkPoints()
+
+        points.SetData(numpy_support.numpy_to_vtk(coords))
+        polydata.SetPoints(points)
+
+        lines = vtk.vtkCellArray()
+        lines.InsertNextCell(coords.shape[0])
+        for i in np.arange(coords.shape[0]):
+            lines.InsertCellPoint(i)
+
+        polydata.SetLines(lines)
+        vtkmultipieceobj.SetPiece(ii, polydata)
+
+    writer = vtk.vtkXMLPolyDataWriter()
+    writer.SetInput(vtkmultipieceobj)
+    writer.SetFileName(filename)
+    writer.SetDataModeToAscii()
+    writer.Write()
+
+
+def write_multilevel_polyline_to_vtp(filename, coords_set, attributes = []):
+    levels = len(coords_set)
+    fid = open(filename, mode='wt')
+    fid.write('<?xml version="1.0"?>\n')
+    fid.write('<VTKFile type="PolyData" version="0.1" byte_order="LittleEndian">\n')
+    fid.write('<PolyData>\n')
+
+
+    T = coords_set[0].shape[0]
+    idx = np.arange(T)
+    g = [''.join(str(i)) for i in idx]
+    idx_str = ' '.join(g)
+
+    for ii in np.arange(levels):
+        coords = coords_set[ii]
+        fid.write('<Piece NumberOfPoints="{0}" NumberOfVerts="0" NumberOfLines="1" NumberOfStrips="0" NumberOfPolys="0">\n'.format(T))
+        fid.write('<Points>\n')
+        fid.write('<DataArray type="Float32" NumberOfComponents="3" format="ascii">\n')
+        for i in coords:
+            fid.write("{0:f} {1:f} {2:f}\n".format(float(i[0]), float(i[1]), float(i[2])))
+
+        fid.write('</DataArray>\n')
+        fid.write('</Points>\n')
+        fid.write('<Lines>\n')
+        fid.write('<DataArray type="Int32" Name="connectivity" format="ascii">\n')
+
+        fid.write(idx_str + '\n')
+        fid.write('\n</DataArray>\n')
+        fid.write('<DataArray type="Int32" Name="offsets" format="ascii">\n')
+        fid.write(str(T) + '\n')
+        fid.write('</DataArray>\n')
+        fid.write('</Lines>\n')
+        fid.write('</Piece>\n')
+
+    fid.write('</PolyData>\n')
+    fid.write('</VTKFile>\n')
+    fid.close()
+
+
 def WriteVTK_XML_Polydata_old(vtkfile,coords,faces,attriblabel,attrib,ascii_flag=True):
 
     sys.stdout.write('Writing vtp file ' + vtkfile + '...')

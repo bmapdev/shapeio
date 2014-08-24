@@ -43,7 +43,7 @@ def ReadUCFMultipleLevelsWithData(filename):
             dummy=dummy.rstrip()
         N = int(fid.readline().rstrip('\n'))
         dummy = fid.readline()
-        Xtemp = [fid.readline().rstrip().split(' ') for i in np.arange(0,N)]
+        Xtemp = [fid.readline().rstrip().split() for i in np.arange(0,N)]
 
         Xtemp = np.array(Xtemp,dtype=float)
 
@@ -341,7 +341,10 @@ def writecurve(filename, coords, attributes=[], isMultilevelUCF=False):
             WriteUCF(coords,'',attributes,filename)
 
     def vtp(filename):
-        vtkio.write_vtk_xml_polydata_curve(filename, coords, attributes)
+        if isMultilevelUCF:
+            vtkio.write_multilevel_polyline_to_vtp(filename, coords, attributes)
+        else:
+            vtkio.write_vtk_xml_polydata_curve(filename, coords, attributes)
 
 
     path_filename,ext = os.path.splitext(filename)

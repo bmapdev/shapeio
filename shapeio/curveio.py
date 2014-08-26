@@ -341,11 +341,7 @@ def writecurve(filename, coords, attributes=[], isMultilevelUCF=False):
             WriteUCF(coords,'',attributes,filename)
 
     def vtp(filename):
-        if isMultilevelUCF:
-            vtkio.write_multilevel_polyline_to_vtp(filename, coords, attributes)
-        else:
-            vtkio.write_vtk_xml_polydata_curve(filename, coords, attributes)
-
+        vtkio.write_multilevel_polyline_to_vtp(filename, coords, attributes)
 
     path_filename,ext = os.path.splitext(filename)
 

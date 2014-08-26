@@ -127,15 +127,21 @@ def write_vtk_xml_polydata_curve_set(filename, coords_set, attributes = []):
     writer.Write()
 
 
-def write_multilevel_polyline_to_vtp(filename, coords_set, attributes = []):
+def write_multilevel_polyline_to_vtp(filename, coords_set, attributes_set=[]):
 
+    attribute_list = None
     if type(coords_set) == list:
         levels = len(coords_set)
         coords_list = coords_set
+        if len(attributes_set) == levels:
+            attribute_list = attributes_set
     else:
         levels = 1
         coords_list = []
         coords_list.append(coords_set)
+        if len(attributes_set) > 0:
+            attribute_list = []
+            attribute_list.append(attributes_set)
 
     # First format all coords in coords_list to be tall instead of wide
     for ii in np.arange(levels):
@@ -153,7 +159,7 @@ def write_multilevel_polyline_to_vtp(filename, coords_set, attributes = []):
         idx = np.arange(T)
         g = [''.join(str(i)) for i in idx]
         idx_str = ' '.join(g)
-
+        fid.write('<!-- Level={0} -->\n'.format(ii))
         fid.write('<Piece NumberOfPoints="{0}" NumberOfVerts="0" NumberOfLines="1" NumberOfStrips="0" NumberOfPolys="0">\n'.format(T))
         fid.write('<Points>\n')
         fid.write('<DataArray type="Float32" NumberOfComponents="3" format="ascii">\n')
@@ -162,10 +168,19 @@ def write_multilevel_polyline_to_vtp(filename, coords_set, attributes = []):
 
         fid.write('</DataArray>\n')
         fid.write('</Points>\n')
+        if attribute_list:
+            attributes = attribute_list[ii]
+            if len(attribute_list[ii]) == T:
+                fid.write('<PointData Scalars="Attributes">\n')
+                fid.write('<DataArray type="Float32" Name="Attributes" format="ascii">\n')
+                for i in attribute_list[ii]:
+                    fid.write('{0:f} '.format(attributes[i]))
+                fid.write('\n</DataArray>\n')
+                fid.write('</PointData>\n')
+
         fid.write('<Lines>\n')
         fid.write('<DataArray type="Int32" Name="connectivity" format="ascii">\n')
-
-        fid.write(idx_str + '\n')
+        fid.write(idx_str)
         fid.write('\n</DataArray>\n')
         fid.write('<DataArray type="Int32" Name="offsets" format="ascii">\n')
         fid.write(str(T) + '\n')

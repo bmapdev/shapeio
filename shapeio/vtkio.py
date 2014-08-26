@@ -174,7 +174,7 @@ def write_multilevel_polyline_to_vtp(filename, coords_set, attributes_set=[]):
                 fid.write('<PointData Scalars="Attributes">\n')
                 fid.write('<DataArray type="Float32" Name="Attributes" format="ascii">\n')
                 for i in attribute_list[ii]:
-                    fid.write('{0:f} '.format(attributes[i]))
+                    fid.write('{0:f} '.format(i))
                 fid.write('\n</DataArray>\n')
                 fid.write('</PointData>\n')
 

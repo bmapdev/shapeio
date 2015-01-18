@@ -12,7 +12,7 @@ import numpy as np
 import dfcio
 import parser
 import vtkio
-#import bs4
+import bs4
 
 
 def ReadUCFMultipleLevelsWithData(filename):

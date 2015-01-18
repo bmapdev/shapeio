@@ -13,6 +13,7 @@ requirements:
         - pandas
         - vtk
         - numpy
+        - beautiful-soup
 
 build:
      number: 1

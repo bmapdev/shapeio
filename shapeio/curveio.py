@@ -10,9 +10,9 @@ import os
 import sys
 import numpy as np
 import dfcio
-import parser
 import vtkio
 import bs4
+from svg.path import parse_path
 
 
 def ReadUCFMultipleLevelsWithData(filename):
@@ -318,7 +318,7 @@ def ReadSVG(filename):
 
     path_d = maxpath['d']
 
-    path1 = parser.parse_path(path_d)
+    path1 = parse_path(path_d)
     X = np.empty((100,3))
     ctr = 0
     for i in np.linspace(0,1,100):
@@ -328,8 +328,8 @@ def ReadSVG(filename):
         ctr += 1
 
     attributes = []
-
-    return X,attributes
+    isMultilevelUCF = False
+    return X, attributes, isMultilevelUCF
 
 
 def writecurve(filename, coords, attributes=[], isMultilevelUCF=False):

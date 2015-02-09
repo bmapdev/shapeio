@@ -15,6 +15,7 @@ import dfsio
 import re
 import StringIO
 import pandas as pd
+import nibabel
 
 # Optionally import the parse module
 import imp
@@ -75,19 +76,7 @@ def _get_chunk(stream, chunk_size):
         return ''
 
 def ReadPial(filename):
-    fid = open(filename,'rb')
-    b1, b2, b3 = np.fromfile(fid, dtype=np.uint8, count=3)
-
-    magic_code = (b1 << 16) + (b2 << 8) + b3
-    if magic_code == 16777214:  # Currently only read triangular meshes
-        dummy = fid.readline()
-        dummy = fid.readline()
-        vnum = np.fromfile(fid,dtype=">i4",count=1)[0]
-        fnum = np.fromfile(fid,dtype=">i4",count=1)[0]
-        coords = np.fromfile(fid,dtype=">f4",count=vnum*3).reshape(vnum,3)
-        faces = np.fromfile(fid,dtype=">i4",count=fnum*3).reshape(fnum,3)
-    else:
-        sys.stdout.write('Invalid file type. Currently only Freesurfer triangular meshes are supported.')
+    coords, faces = nibabel.freesurfer.io.read_geometry(filename)
     return coords, faces
 
 
@@ -441,7 +430,7 @@ def readsurface_new(filename):
         return coords,faces,attributes,isMultilevelUCF
 
     def vtp(filename):
-        coords,faces,attributes = vtkio.ReadVTK_XML_Polydata(filename)
+        coords,faces,attributes, labels = vtkio.ReadVTK_XML_Polydata(filename)
         isMultilevelUCF = False
         return coords,faces,attributes,isMultilevelUCF
 
@@ -581,8 +570,7 @@ def writesurface(filename,coords,faces,attributes):
         return None
 
     def pial(filename):
-        # FSio.write_geometry(filename,coords,faces)
-        # sys.stdout.write("Not implemented.")
+        nibabel.freesurfer.io.write_geometry(filename, coords, faces)
         return None
 
     path_filename,ext = os.path.splitext(filename)
@@ -629,8 +617,8 @@ def writesurface_new(filename,coords,faces,attributes=[],isMultilevelUCF=False):
         return None
 
     def pial(filename):
-        # FSio.write_geometry(filename,coords,faces)
-        # sys.stdout.write("Not implemented.")
+        sys.stdout.write('Writing pial file ' + filename)
+        nibabel.freesurfer.io.write_geometry(filename, coords, faces)
         return None
 
     path_filename,ext = os.path.splitext(filename)

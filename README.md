@@ -1,14 +1,11 @@
-To install shapeio
-=================================
+####To install shapeio
 
 Assume one is working with conda
---------------------------------
 
-Dependencies
-------------
-svg.path, nibabel, vtk, beautifulsoup4 
+##### Dependencies
+Make sure svg.path, nibabel, vtk, beautifulsoup4, pandas are installed.
 
-Install dependencies as:
+You can install them as:
 
 ```pip install nibabel```
 
@@ -20,7 +17,7 @@ Install dependencies as:
 
 ```conda install pandas```
 
-Install shapeio
+####Install shapeio
 ---------------
 ```pip install https://github.com/bmapdev/shapeio/archive/master.zip```
     

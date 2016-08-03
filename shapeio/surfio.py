@@ -10,6 +10,8 @@ __email__ = "s.joshi@ucla.edu"
 import os
 import sys
 import numpy as np
+import vtk
+from vtk.util import numpy_support
 import vtkio
 import dfsio
 import re
@@ -453,7 +455,25 @@ def readsurface_new(filename):
 
         return coords,faces,attributes,isMultilevelUCF
 
-    def vtk(filename):
+    def ply(filename):
+        plyreader = vtk.vtkPLYReader()
+        plyreader.SetFileName(filename)
+        plyreader.Update()
+        mesh = plyreader.GetOutput()
+        coords = numpy_support.vtk_to_numpy(mesh.GetPoints().GetData())
+        temp_faces = numpy_support.vtk_to_numpy(mesh.GetPolys().GetData())
+
+        num_faces = mesh.GetPolys().GetNumberOfCells()
+        strides = np.arange(0, len(temp_faces), 4)
+        faces = np.delete(temp_faces, strides)
+        faces = np.reshape(faces, (num_faces, 3))
+
+        isMultilevelUCF = False
+        attributes = []
+
+        return coords, faces, attributes, isMultilevelUCF
+
+    def vtkformat(filename):
         coords,faces,attributes = vtkio.ReadVTK_Polydata(filename)
         isMultilevelUCF = False
         return coords,faces,attributes,isMultilevelUCF
@@ -476,12 +496,13 @@ def readsurface_new(filename):
     options = {'.vtp'   : vtp,
                '.ucf'   : ucf,
                '.dfs'   : dfs,
-               '.vtk'   : vtk,
+               '.vtk'   : vtkformat,
                '.pial'  : pial,
                '.reg'   : FSsphere,
                '.sphere': pial,
                '.m'     : ccbbm,
                '.obj'   : Mincobj,
+               '.ply'   : ply,
                }
 
     isMultilevelUCF = False
@@ -517,7 +538,7 @@ def readsurface(filename):
 
         return coords,faces,attributes
 
-    def vtk(filename):
+    def vtkformat(filename):
         return None
 
     def pial(filename):
@@ -535,7 +556,7 @@ def readsurface(filename):
     path_filename,ext = os.path.splitext(filename)
     options = {'.vtp'   : vtp,
                '.ucf'   : ucf,
-               '.vtk'   : vtk,
+               '.vtk'   : vtkformat,
                '.pial'  : pial,
                '.reg'   : FSsphere,
                '.sphere': pial,
@@ -565,7 +586,7 @@ def writesurface(filename,coords,faces,attributes):
     def ucf(filename):
         WriteUCF(coords,'',attributes,filename)
 
-    def vtk(filename):
+    def vtkformat(filename):
         sys.stdout.write("Not implemented.")
         return None
 
@@ -577,7 +598,7 @@ def writesurface(filename,coords,faces,attributes):
 
     options = {'.vtp'  : vtp,
                '.ucf'  : ucf,
-               '.vtk'  : vtk,
+               '.vtk'  : vtkformat,
                '.pial' : pial,
                }
     if ext in options:
@@ -612,7 +633,7 @@ def writesurface_new(filename,coords,faces,attributes=[],isMultilevelUCF=False):
     def ucf(filename):
         WriteUCF(coords, '', attributes, filename)
 
-    def vtk(filename):
+    def vtkformat(filename):
         sys.stdout.write("Not implemented.")
         return None
 
@@ -625,7 +646,7 @@ def writesurface_new(filename,coords,faces,attributes=[],isMultilevelUCF=False):
 
     options = {'.vtp'  : vtp,
                '.ucf'  : ucf,
-               '.vtk'  : vtk,
+               '.vtk'  : vtkformat,
                '.pial' : pial,
                '.dfs' : dfs,
                '.m': ccbbm,

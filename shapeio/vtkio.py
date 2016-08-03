@@ -24,7 +24,8 @@ def ReadVTK_Polydata(vtkfile):
     attributes = []
     # TODO Perhps return the array by name in the future
     if pointdata.GetNumberOfArrays() >= 1:  # Attributes present
-        attributes = numpy_support.vtk_to_numpy(pointdata.GetArray(0))
+        if pointdata.GetArray(0).GetName() != 'normals':
+            attributes = numpy_support.vtk_to_numpy(pointdata.GetArray(0))
 
     temp_faces = numpy_support.vtk_to_numpy(mesh.GetPolys().GetData())
 

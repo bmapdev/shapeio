@@ -24,6 +24,7 @@ class Shape(object):
                 '.dfc': 'curve,',
                 '.ucf': 'curve',
                 '.vtp': 'surface',
+                '.vtk': 'surface',
                 '.mgh': 'FSdata',
                 }
 
